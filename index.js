@@ -45,9 +45,6 @@ function checkAnswers() {
       }
       
     } else {
-      console.log('JHGJHGJHGJH', userAnswers[key]);
-      console.log('FFFFFFFFFFFFFF',data[key]);
-      console.log(userAnswers[key] === data[key]);
 
       if(userAnswers[key] === data[key]) {
         correctAns += 1;
@@ -64,7 +61,6 @@ function generateMessage() {
 
 
 function onQuestionChange(e) {
-  console.log(e.target.name);
   
   if(e.target.type === 'checkbox') {
     if(userAnswers.hasOwnProperty(e.target.name)) {
@@ -83,7 +79,6 @@ function onQuestionChange(e) {
   } else {
     userAnswers[e.target.name] = e.target.value;
   }
-  console.log(userAnswers);
   enableButton();
 }
 
@@ -91,9 +86,6 @@ function enableButton() {
   let isEnabled = true;
   let dataKeys = Object.keys(data);
   dataKeys.forEach((key) => {
-    console.log(!userAnswers.hasOwnProperty(key));
-    console.log('ANSWERS', userAnswers);
-    console.log('KEY', key);
     if(!userAnswers.hasOwnProperty(key)) {
       isEnabled = false;
     };
