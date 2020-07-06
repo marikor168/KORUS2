@@ -1,99 +1,93 @@
-let data = {
+let correctAnswers = {
   ques1: 'ans1',
   ques2: ['HTML', 'CSS'],
 };
 
 let userAnswers = {};
 
-let results = document.querySelector('.results'),
+let resultsElem = document.querySelector('.results'),
     btn = document.querySelector('button'),
     form = document.querySelector('form'),
-    question1 = document.querySelector('.question1'),
-    question2 = document.querySelector('.question2');
-let correctAns = 0;
-let questions = 2;
+    inputs = document.querySelectorAll('form#questions input');
 
+form.addEventListener('submit', submitHandle);
+for (let i = 0; i < inputs.length; i++) {
+  inputs[i].addEventListener('change', onQuestionChange)
+}
 
-form.addEventListener('submit', (e) => {
+function submitHandle(e) {
   e.preventDefault();
-  
-  checkAnswers();
-  generateMessage();
+
+  let questionsAmount = Object.keys(correctAnswers).length;
+  let correctAmount = checkAnswers();
+
+  createAndAppendMessage(correctAmount, questionsAmount);
+
   form.classList.add('hide');
-  results.classList.remove('hide');
-});
+  resultsElem.classList.remove('hide');
+}
 
 function checkAnswers() {
   let userKeys = Object.keys(userAnswers);
+  let corrUserAnswersAmount = 0;
   
   userKeys.forEach((key) => {
     let ans = userAnswers[key];
-    let correct = data[key];
+    let correct = correctAnswers[key];
     if(Array.isArray(ans)) {
-      let isRight = true;
-      if(ans.length === correct.length) {
-        ans = ans.sort();
-        correct = correct.sort();
-        ans.forEach((item, i) => {
-          if(item !== correct[i]) {
-            isRight = false;
-          }  
-        });
-        if(isRight) {
-          correctAns++;
+        if(areArraysSame(ans, correct)) {
+          corrUserAnswersAmount++;
         }
-      }
-      
     } else {
-
-      if(userAnswers[key] === data[key]) {
-        correctAns += 1;
+      if(userAnswers[key] === correctAnswers[key]) {
+        corrUserAnswersAmount += 1;
       }
     }
   });
-};
 
-function generateMessage() {
-  let resultMessage = `Вы ответили на ${correctAns} из ${questions} вопросов`;
-  
-  results.append(resultMessage);
+  return corrUserAnswersAmount;
 }
 
+function areArraysSame(first, second) {
+  if (first.length !== second.length) return false;
+
+  first = first.sort();
+  second = second.sort();
+  for (let i = 0; i < first.length; i++) {
+    if(first[i] !== second[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function createAndAppendMessage(correct, all) {
+  let resultMessage = `Вы ответили на ${correct} из ${all} вопросов`;
+  resultsElem.append(resultMessage);
+}
 
 function onQuestionChange(e) {
-  
-  if(e.target.type === 'checkbox') {
-    if(userAnswers.hasOwnProperty(e.target.name)) {
-      if(Array.isArray(userAnswers[e.target.name])) {
-        if(userAnswers[e.target.name].includes(e.target.value)) {
-          userAnswers[e.target.name] = userAnswers[e.target.name].filter((i) => i !== e.target.value);
+  const {type, name, value} = e.target;
+  if(type === 'checkbox') {
+    if(userAnswers.hasOwnProperty(name) && Array.isArray(userAnswers[name])) {
+        if(userAnswers[name].includes(value)) {
+          userAnswers[name] = userAnswers[name].filter((i) => i !== value);
         } else {
-          userAnswers[e.target.name].push(e.target.value);
+          userAnswers[name].push(value);
         }
-      } else {
-        userAnswers[e.target.name] = [e.target.value];
-      }
     } else {
-      userAnswers[e.target.name] = [e.target.value];
+      userAnswers[name] = [value];
     }    
   } else {
-    userAnswers[e.target.name] = e.target.value;
+    userAnswers[name] = value;
   }
-  enableButton();
+
+  toggleButtonIfNeeded();
 }
 
-function enableButton() {
-  let isEnabled = true;
-  let dataKeys = Object.keys(data);
-  dataKeys.forEach((key) => {
-    if(!userAnswers.hasOwnProperty(key)) {
-      isEnabled = false;
-    };
-    if(userAnswers[key] && (userAnswers[key] < 1)) {
-      isEnabled = false;
-    }
-  });
-  
+function toggleButtonIfNeeded() {
+  let isEnabled = shouldSubmitEnabled();
   if(isEnabled) {
     btn.removeAttribute('disabled');
   } else {
@@ -101,5 +95,14 @@ function enableButton() {
   }
 }
 
-question1.addEventListener('change', onQuestionChange);
-question2.addEventListener('change', onQuestionChange);
+function shouldSubmitEnabled() {
+  let isEnabled = true;
+  let dataKeys = Object.keys(correctAnswers);
+  dataKeys.forEach((key) => {
+    if(!userAnswers[key] || (userAnswers[key] && (userAnswers[key].length < 1))) {
+      isEnabled = false;
+    }
+  });
+
+  return isEnabled;
+}
