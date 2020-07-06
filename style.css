@@ -1,0 +1,16 @@
+* {
+  font-family: sans-serif;
+}
+
+.hide {
+  display: none;
+}
+
+.question {
+  margin: 5px 0 5px 0;
+  border-bottom: 1px solid #aeaeae;
+}
+
+.question2 {
+  border-bottom: none;
+}
